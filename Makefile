@@ -10,13 +10,14 @@
 
 NAME		= strace
 
-SRC		= src/strace.c			\
-		  src/usage.c			\
-		  src/puts.c			\
-		  src/get_params.c		\
+SRC		= src/get_params.c		\
+		  src/my_str_to_wordtab.c	\
 		  src/nums_syscalls.c		\
 		  src/nums_syscalls32.c		\
 		  src/paths.c			\
+		  src/puts.c			\
+		  src/strace.c			\
+		  src/usage.c			\
 		  src/print/print_int.c		\
 		  src/print/print_size_t.c	\
 		  src/print/print_ssize_t.c	\
@@ -28,8 +29,7 @@ SRC		= src/strace.c			\
 		  src/functions/open.c		\
 		  src/functions/read.c		\
 		  src/functions/mprotect.c	\
-		  src/functions/print_generic.c	\
-		  src/my_str_to_wordtab.c
+		  src/functions/print_generic.c
 
 OBJ		= $(SRC:.c=.o)
 
@@ -39,18 +39,25 @@ CC		= gcc
 
 RM		= rm -f
 
-override CFLAGS	+= -Wall -Wextra -I $(INCLUDES)
+override CFLAGS	= -W -Wall -Wextra -I $(INCLUDES)
 
-$(NAME):	$(OBJ)
-		$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
+%.o:		%.c
+		@$(CC) -c -o $@ $<  $(CFLAGS)
+		@printf "[\033[0;32mcompiled\033[0m] % 29s\n" $< |  tr ' ' '.'
 
 all:		$(NAME)
 
+$(NAME):	$(OBJ)
+		@$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
+		@printf "[\033[0;36mbuilt\033[0m] % 32s\n" $(NAME) | tr ' ' '.'
+
 clean:
-		$(RM) $(OBJ)
+		@$(RM) $(OBJ)
+		@printf "[\033[0;31mdeleted\033[0m] % 30s\n" $(OBJ) | tr ' ' '.'
 
 fclean:		clean
-		$(RM) $(NAME)
+		@$(RM) $(NAME)
+		@printf "[\033[0;35mdeleted\033[0m] % 30s\n" $(NAME) | tr ' ' '.'
 
 re:		fclean all
 
