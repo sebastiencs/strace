@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue Apr 28 04:18:52 2015 chapui_s
-** Last update Tue May  5 08:19:31 2015 chapui_s
+** Last update Tue May  5 08:36:44 2015 chapui_s
 */
 
 #include "strace.h"
@@ -29,11 +29,17 @@ int		get_archi(char *filename)
   if ((fd = open(filename, O_RDONLY)) == -1)
     return (-1);
   if (read(fd, &header, sizeof(Elf32_Ehdr)) != sizeof(Elf32_Ehdr))
+  {
+    close(fd);
     return (-1);
+  }
   if (header.e_machine == EM_386)
     g_archi32 = 1;
   else if (header.e_machine != EM_X86_64)
+  {
+    close(fd);
     return (derrorn("Unsupported format"));
+  }
   close(fd);
   return (0);
 }
@@ -43,6 +49,8 @@ int	run_prog(int argc __attribute__ ((unused)),
 		 char **env,
 		 char *path)
 {
+  if (g_archi32)
+    printf("[ Process PID=%d runs in 32 bit mode. ]\n", getpid());
   if (ptrace(PTRACE_TRACEME, 0, 0, 0, 0) == -1)
   {
     return (derror("ptrace"));
@@ -113,7 +121,6 @@ void		disp_syscall(pid_t pid,
   if ((sys = is_syscall_defined(num)) >= 0)
   {
     if ((fct = is_functions_associated(ptr[sys].name)) != -1)
-    /* if ((fct = is_functions_associated(g_syscalls[sys].name)) != -1) */
     {
       g_print_func[fct].fct(pid, regs, return_value);
     }
