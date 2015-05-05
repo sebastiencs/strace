@@ -1,11 +1,11 @@
 /*
-** types32_base.h for epitech in /home/chapui_s/rendu/
+** types32.h for epitech in /home/chapui_s/rendu/
 **
 ** Made by chapui_s
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue May  5 07:13:23 2015 chapui_s
-** Last update Tue May  5 07:13:24 2015 chapui_s
+** Last update Tue May  5 08:43:54 2015 chapui_s
 */
 
 #ifndef TYPES32_H_
@@ -131,4 +131,4 @@
 # define X32STRUCT_FILE_HANDLE_P	(1118)
 # define X32CONST_STRUCT_SCHED_ATTR_P	(1119)
 
-#endif /* !TYPES_H_ */
+#endif /* !TYPES32_H_ */

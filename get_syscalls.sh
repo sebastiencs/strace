@@ -28,60 +28,60 @@ if [ $(basename "$1") == "unistd_32.h" ]; then
     ARCH_32BITS="1"
 fi
 
-# mkdir -p $TMP_DIR
-# cat "$1" | cut -d ' ' -f 2 | grep __NR_ | sed "s/ /\", /g" | sed "s/__NR_//g" > $TMP_DIR/tmp_syscalls
-# # cat /usr/include/asm/unistd_64.h | cut -d ' ' -f 2 | grep __NR_ | sed "s/ /\", /g" | sed "s/__NR_//g" > $TMP_DIR/tmp_syscalls
+mkdir -p $TMP_DIR
+cat "$1" | cut -d ' ' -f 2 | grep __NR_ | sed "s/ /\", /g" | sed "s/__NR_//g" > $TMP_DIR/tmp_syscalls
+# cat /usr/include/asm/unistd_64.h | cut -d ' ' -f 2 | grep __NR_ | sed "s/ /\", /g" | sed "s/__NR_//g" > $TMP_DIR/tmp_syscalls
 
-# echo "Analysing man pages..."
-# for line in $(cat $TMP_DIR/tmp_syscalls);
-# do
-#     echo -en "\r\033[K$line"
-#     man 2 $line > $TMP_DIR/$line.man 2>/dev/null
-#     if [ ! -s $TMP_DIR/$line.man ]; then
-# 	echo -n ""
-# #       echo "Can't find man"
-#     else
-# 	BEGIN_SYNOPSIS=$(cat $TMP_DIR/$line.man | grep -n "SYNOPSIS" | cut -d ':' -f1)
-# 	END_SYNOPSIS=$(cat $TMP_DIR/$line.man | grep -n "DESCRIPTION" | cut -d ':' -f1)
-# 	BEGIN_SYNOPSIS=$(echo $BEGIN_SYNOPSIS | cut -d ' ' -f1)
-# 	END_SYNOPSIS=$(echo $END_SYNOPSIS | cut -d ' ' -f1)
+echo "Analysing man pages..."
+for line in $(cat $TMP_DIR/tmp_syscalls);
+do
+    echo -en "\r\033[K$line"
+    man 2 $line > $TMP_DIR/$line.man 2>/dev/null
+    if [ ! -s $TMP_DIR/$line.man ]; then
+	echo -n ""
+#       echo "Can't find man"
+    else
+	BEGIN_SYNOPSIS=$(cat $TMP_DIR/$line.man | grep -n "SYNOPSIS" | cut -d ':' -f1)
+	END_SYNOPSIS=$(cat $TMP_DIR/$line.man | grep -n "DESCRIPTION" | cut -d ':' -f1)
+	BEGIN_SYNOPSIS=$(echo $BEGIN_SYNOPSIS | cut -d ' ' -f1)
+	END_SYNOPSIS=$(echo $END_SYNOPSIS | cut -d ' ' -f1)
 
-# 	BEGIN_PROTO=$(cat $TMP_DIR/$line.man | sed -n "$BEGIN_SYNOPSIS, $END_SYNOPSIS p" | grep "[a-z+] $line" -n | cut -d ':' -f1)
-# 	BEGIN_PROTO=$(echo $BEGIN_PROTO | cut -d ' ' -f1)
-# 	if [ ! $BEGIN_PROTO ]; then
-# 	    BEGIN_PROTO=$(cat $TMP_DIR/$line.man | sed -n "$BEGIN_SYNOPSIS, $END_SYNOPSIS p" | grep "[a-z+] [*?]$line" -n | cut -d ':' -f1)
-# 	fi
+	BEGIN_PROTO=$(cat $TMP_DIR/$line.man | sed -n "$BEGIN_SYNOPSIS, $END_SYNOPSIS p" | grep "[a-z+] $line" -n | cut -d ':' -f1)
+	BEGIN_PROTO=$(echo $BEGIN_PROTO | cut -d ' ' -f1)
+	if [ ! $BEGIN_PROTO ]; then
+	    BEGIN_PROTO=$(cat $TMP_DIR/$line.man | sed -n "$BEGIN_SYNOPSIS, $END_SYNOPSIS p" | grep "[a-z+] [*?]$line" -n | cut -d ':' -f1)
+	fi
 
-# 	if [ ! $BEGIN_PROTO ]; then
-# 	    echo -n ""
-# 	    # echo "Can't find proto"
-# 	else
-# 	    END_PROTO=$(cat $TMP_DIR/$line.man | sed -n "$BEGIN_SYNOPSIS, $END_SYNOPSIS p" | sed -n "$BEGIN_PROTO, $END_SYNOPSIS p" | grep ";" -n | cut -d ':' -f1)
-# 	    BEGIN_PROTO=$(echo $BEGIN_PROTO | cut -d ' ' -f1)
-# 	    END_PROTO=$(echo $END_PROTO | cut -d ' ' -f1)
+	if [ ! $BEGIN_PROTO ]; then
+	    echo -n ""
+	    # echo "Can't find proto"
+	else
+	    END_PROTO=$(cat $TMP_DIR/$line.man | sed -n "$BEGIN_SYNOPSIS, $END_SYNOPSIS p" | sed -n "$BEGIN_PROTO, $END_SYNOPSIS p" | grep ";" -n | cut -d ':' -f1)
+	    BEGIN_PROTO=$(echo $BEGIN_PROTO | cut -d ' ' -f1)
+	    END_PROTO=$(echo $END_PROTO | cut -d ' ' -f1)
 
-# 	    END_PROTO=$(($BEGIN_PROTO + $END_PROTO - 1))
+	    END_PROTO=$(($BEGIN_PROTO + $END_PROTO - 1))
 
-# 	    if [ $BEGIN_PROTO ]; then
-# 	    	PROTOTYPE=$(cat $TMP_DIR/$line.man | sed -n "$BEGIN_SYNOPSIS, $END_SYNOPSIS p" | sed -n "$BEGIN_PROTO, $END_PROTO p" | sed ':a;N;$!ba;s/\n//g' | xargs)
+	    if [ $BEGIN_PROTO ]; then
+	    	PROTOTYPE=$(cat $TMP_DIR/$line.man | sed -n "$BEGIN_SYNOPSIS, $END_SYNOPSIS p" | sed -n "$BEGIN_PROTO, $END_PROTO p" | sed ':a;N;$!ba;s/\n//g' | xargs)
 
-# 		if [ "$PROTOTYPE" ]; then
-# 		    echo "$PROTOTYPE" > $TMP_DIR/$line.proto
-# 		fi
-# 	    else
-# 		echo -n ""
-# 	    	# echo "PAS TROUVER"
-# 	    fi
+		if [ "$PROTOTYPE" ]; then
+		    echo "$PROTOTYPE" > $TMP_DIR/$line.proto
+		fi
+	    else
+		echo -n ""
+	    	# echo "PAS TROUVER"
+	    fi
 
-# 	fi
+	fi
 
-#     fi
+    fi
 
-#     rm -f $TMP_DIR/$line.man
+    rm -f $TMP_DIR/$line.man
 
-# done
+done
 
-# echo -e "\r\033[Kdone"
+echo -e "\r\033[Kdone"
 
 cat "$1" | cut -d ' ' -f 2,3 | grep __NR_ | sed "s/ /+/g" | sed "s/__NR_//g" > $TMP_DIR/tmp_sysnums
 # cat /usr/include/asm/unistd_64.h | cut -d ' ' -f 2,3 | grep __NR_ | sed "s/ /+/g" | sed "s/__NR_//g" > $TMP_DIR/tmp_sysnums
@@ -189,6 +189,10 @@ do
 done
 
 echo -e "\r\033[Kdone"
-echo -e "\n#endif /* !TYPES_H_ */" >> $FILE_TYPES
+if [ "$ARCH_32BITS" -eq "1" ]; then
+    echo -e "\n#endif /* !TYPES32_H_ */" >> $FILE_TYPES
+else
+    echo -e "\n#endif /* !TYPES_H_ */" >> $FILE_TYPES
+fi
 echo -e "};\n\nsize_t\t$NAME_SIZE_TAB = sizeof($NAME_TAB) / sizeof($NAME_TAB[0]);\n" >> $FILE_SYSCALLS
 #echo -e "};\n\n#endif /* !SYSCALL_H_ */" >> $FILE_SYSCALLS

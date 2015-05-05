@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue May  5 03:53:33 2015 chapui_s
-** Last update Tue May  5 08:08:20 2015 chapui_s
+** Last update Tue May  5 08:45:22 2015 chapui_s
 */
 
 #include "strace.h"
@@ -53,7 +53,8 @@ void		print_type(pid_t pid, unsigned num, char nparam, size_t value)
   {
     i = 0;
     type += nparam;
-    while (g_functions_print[i].type != -1 && g_functions_print[i].type != type[0])
+    while (g_functions_print[i].type != -1
+	   && g_functions_print[i].type != type[0])
       i += 1;
     if (g_functions_print[i].type != -1)
       g_functions_print[i].fct(pid, value);
