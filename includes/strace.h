@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue Apr 28 04:18:11 2015 chapui_s
-** Last update Tue May  5 04:04:46 2015 chapui_s
+** Last update Tue May  5 06:03:47 2015 chapui_s
 */
 
 #ifndef STRACE_H_
@@ -63,6 +63,7 @@ char		*strdup(const char *s);
 
 void		print_int(pid_t pid, size_t value);
 void		print_size_t(pid_t pid, size_t value);
+void		print_ssize_t(pid_t pid, size_t value);
 void		print_off_t(pid_t pid, size_t value);
 void		print_void_ptr(pid_t pid, size_t value);
 void		print_char_ptr(pid_t pid, size_t value);
@@ -74,6 +75,9 @@ void		print_access(pid_t pid,
 			     struct user_regs_struct *regs,
 			     size_t ret);
 void		print_open(pid_t pid,
+			   struct user_regs_struct *regs,
+			   size_t ret);
+void		print_read(pid_t pid,
 			   struct user_regs_struct *regs,
 			   size_t ret);
 void		print_generic(pid_t pid,

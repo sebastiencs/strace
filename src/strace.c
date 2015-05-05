@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue Apr 28 04:18:52 2015 chapui_s
-** Last update Tue May  5 04:06:27 2015 chapui_s
+** Last update Tue May  5 05:49:40 2015 chapui_s
 */
 
 #include "strace.h"
@@ -52,7 +52,7 @@ int		is_syscall_defined(unsigned num)
       return (i);
     i += 1;
   }
-  return (0);
+  return (-1);
 }
 
 t_print_func	g_print_func[] =
@@ -60,6 +60,7 @@ t_print_func	g_print_func[] =
   { "mmap", print_mmap },
   { "access", print_access },
   { "open", print_open },
+  { "read", print_read },
   { (char*)0, (void*)0 }
 };
 
@@ -90,7 +91,7 @@ void		disp_syscall(pid_t pid,
   int		sys;
   int		fct;
 
-  if ((sys = is_syscall_defined(num)))
+  if ((sys = is_syscall_defined(num)) >= 0)
   {
     if ((fct = is_functions_associated(g_syscalls[sys].name)) != -1)
     {
@@ -152,7 +153,7 @@ int	trace_fork(int argc, char **argv, char **env)
 
 int	main(int argc, char **argv, char **env)
 {
-  setbuf(stdout, NULL);
+  setbuf(stdout, (char*)0);
   if (!(argc - 1))
     return (usage(argv[0]));
   else if (!strcmp(argv[1], "-p"))

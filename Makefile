@@ -5,7 +5,7 @@
 ## Login   <chapui_s@epitech.eu>
 ##
 ## Started on  Tue Apr 28 04:19:54 2015 chapui_s
-## Last update Tue May  5 04:03:40 2015 chapui_s
+## Last update Tue May  5 06:03:55 2015 chapui_s
 ##
 
 NAME		= strace
@@ -17,12 +17,14 @@ SRC		= src/strace.c			\
 		  src/paths.c			\
 		  src/print/print_int.c		\
 		  src/print/print_size_t.c	\
+		  src/print/print_ssize_t.c	\
 		  src/print/print_off_t.c	\
 		  src/print/print_void_ptr.c	\
 		  src/print/print_char_ptr.c	\
 		  src/functions/mmap.c		\
 		  src/functions/access.c	\
 		  src/functions/open.c		\
+		  src/functions/read.c		\
 		  src/functions/print_generic.c	\
 		  src/my_str_to_wordtab.c
 
