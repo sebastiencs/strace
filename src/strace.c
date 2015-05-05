@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue Apr 28 04:18:52 2015 chapui_s
-** Last update Tue May  5 05:49:40 2015 chapui_s
+** Last update Tue May  5 06:11:36 2015 chapui_s
 */
 
 #include "strace.h"
@@ -61,6 +61,7 @@ t_print_func	g_print_func[] =
   { "access", print_access },
   { "open", print_open },
   { "read", print_read },
+  { "mprotect", print_mprotect },
   { (char*)0, (void*)0 }
 };
 

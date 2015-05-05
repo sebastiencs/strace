@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue Apr 28 04:18:11 2015 chapui_s
-** Last update Tue May  5 06:03:47 2015 chapui_s
+** Last update Tue May  5 06:11:16 2015 chapui_s
 */
 
 #ifndef STRACE_H_
@@ -80,6 +80,9 @@ void		print_open(pid_t pid,
 void		print_read(pid_t pid,
 			   struct user_regs_struct *regs,
 			   size_t ret);
+void		print_mprotect(pid_t pid,
+			       struct user_regs_struct *regs,
+			       size_t ret);
 void		print_generic(pid_t pid,
 			      struct user_regs_struct *regs,
 			      size_t return_value,

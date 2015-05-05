@@ -5,7 +5,7 @@
 ## Login   <chapui_s@epitech.eu>
 ##
 ## Started on  Tue Apr 28 04:19:54 2015 chapui_s
-## Last update Tue May  5 06:03:55 2015 chapui_s
+## Last update Tue May  5 06:11:00 2015 chapui_s
 ##
 
 NAME		= strace
@@ -25,6 +25,7 @@ SRC		= src/strace.c			\
 		  src/functions/access.c	\
 		  src/functions/open.c		\
 		  src/functions/read.c		\
+		  src/functions/mprotect.c	\
 		  src/functions/print_generic.c	\
 		  src/my_str_to_wordtab.c
 
