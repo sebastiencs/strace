@@ -5,73 +5,17 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue Apr 28 04:18:52 2015 chapui_s
-** Last update Tue Apr 28 09:10:21 2015 chapui_s
+** Last update Tue May  5 04:06:27 2015 chapui_s
 */
 
 #include "strace.h"
-
-extern t_syscalls syscalls[];
+#include "types.h"
+#include "syscalls.h"
 
 int	trace_pid(int argc __attribute__ ((unused)),
 		  char **argv __attribute__ ((unused)))
 {
   return (0);
-}
-
-size_t	my_strlen(char *s)
-{
-  return ((s) ? (strlen(s)) : (0));
-}
-
-char	*my_strcat(char *dest, char *src)
-{
-  return ((dest && src) ? (strcat(dest, src)) : (dest));
-}
-
-char		*concat_path_file(char *s1, char *s2)
-{
-  char		*str;
-  size_t	size;
-
-  size = my_strlen(s1) + my_strlen(s2);
-  str = (char*)malloc(size + 2);
-  if (str)
-  {
-    memset(str, 0, size + 2);
-    my_strcat(str, s1);
-    strcat(str, "/");
-    my_strcat(str, s2);
-  }
-  return (str);
-}
-
-char		*get_path(char *file)
-{
-  size_t	i;
-  char		**path_tab;
-  char		*tmp;
-
-  if (file[0] == '.' || file[0] == '/')
-  {
-    return (strdup(file));
-  }
-  else if ((path_tab = my_str_to_wordtab(getenv("PATH"), ':')))
-  {
-    i = 0;
-    while (path_tab[i])
-    {
-      tmp = concat_path_file(path_tab[i], file);
-      if (tmp && access(tmp, X_OK) != -1)
-      {
-	free_wordtab(&path_tab);
-	return (tmp);
-      }
-      free(tmp);
-      i += 1;
-    }
-    free_wordtab(&path_tab);
-  }
-  return ((char*)0);
 }
 
 int	run_prog(int argc __attribute__ ((unused)),
@@ -97,26 +41,65 @@ int	run_prog(int argc __attribute__ ((unused)),
   return (0);
 }
 
-void		disp_syscall(struct user_regs_struct *regs,
+int		is_syscall_defined(unsigned num)
+{
+  size_t	i;
+
+  i = 0;
+  while (i < g_size_tab)
+  {
+    if (g_syscalls[i].num == num)
+      return (i);
+    i += 1;
+  }
+  return (0);
+}
+
+t_print_func	g_print_func[] =
+{
+  { "mmap", print_mmap },
+  { "access", print_access },
+  { "open", print_open },
+  { (char*)0, (void*)0 }
+};
+
+int		is_functions_associated(char *name)
+{
+  size_t	i;
+
+  i = 0;
+  while (g_print_func[i].name && strcmp(name, g_print_func[i].name))
+  {
+    i += 1;
+  }
+  if (g_print_func[i].name)
+  {
+    return (i);
+  }
+  else
+  {
+    return (-1);
+  }
+}
+
+void		disp_syscall(pid_t pid,
+			     struct user_regs_struct *regs,
 			     unsigned num,
 			     size_t return_value)
 {
-  if (num <= 322)
+  int		sys;
+  int		fct;
+
+  if ((sys = is_syscall_defined(num)))
   {
-    printf("%s(", syscalls[num].name);
-    if (syscalls[num].nparams >= 1)
-      printf((regs->rdi) ? ("0x%llx") : ("%llx"), regs->rdi);
-    if (syscalls[num].nparams >= 2)
-      printf((regs->rsi) ? (", 0x%llx") : (", %llx"), regs->rsi);
-    if (syscalls[num].nparams >= 3)
-      printf((regs->rdx) ? (", 0x%llx") : (", %llx"), regs->rdx);
-    if (syscalls[num].nparams >= 4)
-      printf((regs->rcx) ? (", 0x%llx") : (", %llx"), regs->rcx);
-    if (syscalls[num].nparams >= 5)
-      printf((regs->r8) ? (", 0x%llx") : (", %llx"), regs->r8);
-    if (syscalls[num].nparams >= 6)
-      printf((regs->r9) ? (", 0x%llx") : (", %llx"), regs->r9);
-    printf((return_value) ? (") = 0x%lx\n") : (") = %lx\n"), return_value);
+    if ((fct = is_functions_associated(g_syscalls[sys].name)) != -1)
+    {
+      g_print_func[fct].fct(pid, regs, return_value);
+    }
+    else
+    {
+      print_generic(pid, regs, return_value, num);
+    }
   }
 }
 
@@ -142,7 +125,7 @@ int				run_trace_fork(pid_t child)
     ptrace(PTRACE_GETREGS, child, 0, &regs_return);
     if (sysc)
     {
-      disp_syscall(&regs, regs.rax, regs_return.rax);
+      disp_syscall(child, &regs, regs.rax, regs_return.rax);
     }
   }
   return (0);
@@ -153,9 +136,13 @@ int	trace_fork(int argc, char **argv, char **env)
   pid_t	child;
 
   if ((child = fork()) == -1)
+  {
     return (derror("fork"));
+  }
   else if (!child)
+  {
     run_prog(argc, argv, env);
+  }
   else
   {
     run_trace_fork(child);
