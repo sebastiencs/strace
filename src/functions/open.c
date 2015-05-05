@@ -5,51 +5,59 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue May  5 03:08:51 2015 chapui_s
-** Last update Tue May  5 08:13:32 2015 chapui_s
+** Last update Tue May  5 18:12:16 2015 chapui_s
 */
 
 #include "strace.h"
 
-static void	print_flags2(int flags)
+static int	print_flags2(int flags)
 {
+  int		nb;
+
+  nb = 0;
   if (flags & O_DSYNC)
-    printf("|O_DSYNC");
+    nb += printf("|O_DSYNC");
   if (flags & O_EXCL)
-    printf("|O_EXCL");
+    nb += printf("|O_EXCL");
   if (flags & O_NOCTTY)
-    printf("|O_NOCTTY");
+    nb += printf("|O_NOCTTY");
   if (flags & O_NOFOLLOW)
-    printf("|O_NOFOLLOW");
+    nb += printf("|O_NOFOLLOW");
   if (flags & O_NONBLOCK)
-    printf("|O_NONBLOCK");
+    nb += printf("|O_NONBLOCK");
   if (flags & O_SYNC)
-    printf("|O_SYNC");
+    nb += printf("|O_SYNC");
   if (flags & O_TRUNC)
-    printf("|O_TRUNC");
+    nb += printf("|O_TRUNC");
+  return (nb);
 }
 
-static void	print_flags(int flags)
+static int	print_flags(int flags)
 {
+  int		nb;
+
+  nb = 0;
   if ((flags & O_RDONLY) == 0)
-    printf("O_RDONLY");
+    nb += printf("O_RDONLY");
   else if ((flags & O_WRONLY) == 1)
-    printf("O_WRONLY");
+    nb += printf("O_WRONLY");
   else if ((flags & O_RDWR) == 2)
-    printf("O_RDWR");
+    nb += printf("O_RDWR");
   if (flags & O_APPEND)
-    printf("|O_APPEND");
+    nb += printf("|O_APPEND");
   if (flags & O_ASYNC)
-    printf("|O_ASYNC");
+    nb += printf("|O_ASYNC");
   if (flags & O_CLOEXEC)
-    printf("|O_CLOEXEC");
+    nb += printf("|O_CLOEXEC");
   if (flags & O_CREAT)
-    printf("|O_CREAT");
+    nb += printf("|O_CREAT");
   if (flags & O_DIRECTORY)
-    printf("|O_DIRECTORY");
-  print_flags2(flags);
+    nb += printf("|O_DIRECTORY");
+  nb += print_flags2(flags);
+  return (nb);
 }
 
-static void	print_mode(int mode)
+static int	print_mode(int mode)
 {
   int		n;
 
@@ -66,23 +74,28 @@ static void	print_mode(int mode)
   n = (mode & S_IROTH) ? (n + 4) : (n);
   n = (mode & S_IWOTH) ? (n + 2) : (n);
   n = (mode & S_IXOTH) ? (n + 1) : (n);
-  printf("%d", n);
+  return (printf("%d", n));
 }
 
 void		print_open(pid_t pid,
 			     struct user_regs_struct *regs,
 			     size_t return_value)
 {
-  printf("open(");
-  print_char_ptr(pid, get_param(regs, 0));
-  printf(", ");
-  print_flags(get_param(regs, 1));
+  int		nb;
+
+  nb = 0;
+  nb += printf("open(");
+  nb += print_char_ptr(pid, get_param(regs, 0));
+  nb += printf(", ");
+  nb += print_flags(get_param(regs, 1));
   if (get_param(regs, 1) & O_CREAT)
   {
-    printf(", ");
-    print_mode(get_param(regs, 3));
+    nb += printf(", ");
+    nb += print_mode(get_param(regs, 3));
   }
-  printf(") = ");
+  nb += printf(")");
+  print_space(nb);
+  printf("= ");
   print_int(pid, return_value);
   printf("\n");
 }

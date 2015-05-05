@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue Apr 28 04:18:11 2015 chapui_s
-** Last update Tue May  5 08:19:08 2015 chapui_s
+** Last update Tue May  5 16:33:13 2015 chapui_s
 */
 
 #ifndef STRACE_H_
@@ -43,7 +43,7 @@ typedef struct	s_syscalls
 typedef struct	s_func
 {
   int		type;
-  void		(*fct)(pid_t pid, size_t value);
+  int		(*fct)(pid_t pid, size_t value);
 }		t_func;
 
 typedef struct	s_print_func
@@ -64,13 +64,14 @@ size_t		my_strlen(char *s);
 char		*get_path(char *file);
 char		*strdup(const char *s);
 size_t		get_param(struct user_regs_struct *regs, int nparam);
+void		print_space(int nb);
 
-void		print_int(pid_t pid, size_t value);
-void		print_size_t(pid_t pid, size_t value);
-void		print_ssize_t(pid_t pid, size_t value);
-void		print_off_t(pid_t pid, size_t value);
-void		print_void_ptr(pid_t pid, size_t value);
-void		print_char_ptr(pid_t pid, size_t value);
+int		print_int(pid_t pid, size_t value);
+int		print_size_t(pid_t pid, size_t value);
+int		print_ssize_t(pid_t pid, size_t value);
+int		print_off_t(pid_t pid, size_t value);
+int		print_void_ptr(pid_t pid, size_t value);
+int		print_char_ptr(pid_t pid, size_t value);
 
 void		print_mmap(pid_t pid,
 			   struct user_regs_struct *regs,

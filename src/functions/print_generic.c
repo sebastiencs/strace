@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue May  5 03:53:33 2015 chapui_s
-** Last update Tue May  5 08:45:22 2015 chapui_s
+** Last update Tue May  5 16:33:06 2015 chapui_s
 */
 
 #include "strace.h"
@@ -41,14 +41,16 @@ t_func		g_functions_print[] =
   { -1, (void*)0 }
 };
 
-void		print_type(pid_t pid, unsigned num, char nparam, size_t value)
+static int	print_type(pid_t pid, unsigned num, char nparam, size_t value)
 {
   int		*type;
   size_t	i;
+  int		nb;
 
+  nb = 0;
   type = (g_archi32) ? (&g_syscalls32[num].param1) : (&g_syscalls[num].param1);
   if (nparam > 0)
-    printf(", ");
+    nb += printf(", ");
   if (nparam < 6)
   {
     i = 0;
@@ -57,9 +59,19 @@ void		print_type(pid_t pid, unsigned num, char nparam, size_t value)
 	   && g_functions_print[i].type != type[0])
       i += 1;
     if (g_functions_print[i].type != -1)
-      g_functions_print[i].fct(pid, value);
+      nb += g_functions_print[i].fct(pid, value);
     else
-      printf("0x%lx", (size_t)value);
+      nb += printf("0x%lx", (size_t)value);
+  }
+  return (nb);
+}
+
+void		print_space(int nb)
+{
+  while (nb < 40)
+  {
+    printf(" ");
+    nb += 1;
   }
 }
 
@@ -70,21 +82,25 @@ void		print_generic(pid_t pid,
 {
   int		sys;
   t_syscalls	*ptr;
+  int		nb;
 
+  nb = 0;
   ptr = (g_archi32) ? (g_syscalls32) : (g_syscalls);
   sys = is_syscall_defined(num);
-  printf("%s(", ptr[sys].name);
+  nb += printf("%s(", ptr[sys].name);
   if (ptr[sys].nparams >= 1)
-    print_type(pid, num, 0, get_param(regs, 0));
+    nb += print_type(pid, num, 0, get_param(regs, 0));
   if (ptr[sys].nparams >= 2)
-    print_type(pid, num, 1, get_param(regs, 1));
+    nb += print_type(pid, num, 1, get_param(regs, 1));
   if (ptr[sys].nparams >= 3)
-    print_type(pid, num, 2, get_param(regs, 2));
+    nb += print_type(pid, num, 2, get_param(regs, 2));
   if (ptr[sys].nparams >= 4)
-    print_type(pid, num, 3, get_param(regs, 3));
+    nb += print_type(pid, num, 3, get_param(regs, 3));
   if (ptr[sys].nparams >= 5)
-    print_type(pid, num, 4, get_param(regs, 4));
+    nb += print_type(pid, num, 4, get_param(regs, 4));
   if (ptr[sys].nparams >= 6)
-    print_type(pid, num, 5, get_param(regs, 5));
-  printf((return_value) ? (") = 0x%lx\n") : (") = %lx\n"), return_value);
+    nb += print_type(pid, num, 5, get_param(regs, 5));
+  nb += printf(")");
+  print_space(nb);
+  nb += printf((return_value) ? ("= 0x%lx\n") : ("= %lx\n"), return_value);
 }
