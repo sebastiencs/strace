@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue May  5 03:08:51 2015 chapui_s
-** Last update Tue May  5 03:53:45 2015 chapui_s
+** Last update Tue May  5 08:13:32 2015 chapui_s
 */
 
 #include "strace.h"
@@ -74,13 +74,13 @@ void		print_open(pid_t pid,
 			     size_t return_value)
 {
   printf("open(");
-  print_char_ptr(pid, regs->rdi);
+  print_char_ptr(pid, get_param(regs, 0));
   printf(", ");
-  print_flags(regs->rsi);
-  if (regs->rsi & O_CREAT)
+  print_flags(get_param(regs, 1));
+  if (get_param(regs, 1) & O_CREAT)
   {
     printf(", ");
-    print_mode(regs->rdx);
+    print_mode(get_param(regs, 3));
   }
   printf(") = ");
   print_int(pid, return_value);

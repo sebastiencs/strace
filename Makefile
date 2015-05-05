@@ -5,7 +5,7 @@
 ## Login   <chapui_s@epitech.eu>
 ##
 ## Started on  Tue Apr 28 04:19:54 2015 chapui_s
-## Last update Tue May  5 06:11:00 2015 chapui_s
+## Last update Tue May  5 07:58:35 2015 chapui_s
 ##
 
 NAME		= strace
@@ -13,7 +13,9 @@ NAME		= strace
 SRC		= src/strace.c			\
 		  src/usage.c			\
 		  src/puts.c			\
+		  src/get_params.c		\
 		  src/nums_syscalls.c		\
+		  src/nums_syscalls32.c		\
 		  src/paths.c			\
 		  src/print/print_int.c		\
 		  src/print/print_size_t.c	\

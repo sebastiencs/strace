@@ -5,12 +5,14 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue Apr 28 04:18:52 2015 chapui_s
-** Last update Tue May  5 06:11:36 2015 chapui_s
+** Last update Tue May  5 08:19:31 2015 chapui_s
 */
 
 #include "strace.h"
 #include "types.h"
 #include "syscalls.h"
+#include "types32.h"
+#include "syscalls32.h"
 
 int	trace_pid(int argc __attribute__ ((unused)),
 		  char **argv __attribute__ ((unused)))
@@ -18,25 +20,36 @@ int	trace_pid(int argc __attribute__ ((unused)),
   return (0);
 }
 
+int		get_archi(char *filename)
+{
+  int		fd;
+  Elf32_Ehdr	header;
+
+  g_archi32 = 0;
+  if ((fd = open(filename, O_RDONLY)) == -1)
+    return (-1);
+  if (read(fd, &header, sizeof(Elf32_Ehdr)) != sizeof(Elf32_Ehdr))
+    return (-1);
+  if (header.e_machine == EM_386)
+    g_archi32 = 1;
+  else if (header.e_machine != EM_X86_64)
+    return (derrorn("Unsupported format"));
+  close(fd);
+  return (0);
+}
+
 int	run_prog(int argc __attribute__ ((unused)),
 		 char **argv,
-		 char **env)
+		 char **env,
+		 char *path)
 {
-  char	*path;
-
   if (ptrace(PTRACE_TRACEME, 0, 0, 0, 0) == -1)
   {
     return (derror("ptrace"));
   }
-  if ((path = get_path(argv[1])))
+  if (execve(path, &argv[1], env) == -1)
   {
-    if (execve(path, &argv[1], env) == -1)
-      return (derror("execve"));
-    free(path);
-  }
-  else
-  {
-    return (derrorn("No such file"));
+    return (derror("execve"));
   }
   return (0);
 }
@@ -48,7 +61,9 @@ int		is_syscall_defined(unsigned num)
   i = 0;
   while (i < g_size_tab)
   {
-    if (g_syscalls[i].num == num)
+    if (g_archi32 && g_syscalls32[i].num == num)
+      return (i);
+    else if (!g_archi32 && g_syscalls[i].num == num)
       return (i);
     i += 1;
   }
@@ -58,6 +73,7 @@ int		is_syscall_defined(unsigned num)
 t_print_func	g_print_func[] =
 {
   { "mmap", print_mmap },
+  { "mmap2", print_mmap2 },
   { "access", print_access },
   { "open", print_open },
   { "read", print_read },
@@ -91,10 +107,13 @@ void		disp_syscall(pid_t pid,
 {
   int		sys;
   int		fct;
+  t_syscalls	*ptr;
 
+  ptr = (g_archi32) ? (g_syscalls32) : (g_syscalls);
   if ((sys = is_syscall_defined(num)) >= 0)
   {
-    if ((fct = is_functions_associated(g_syscalls[sys].name)) != -1)
+    if ((fct = is_functions_associated(ptr[sys].name)) != -1)
+    /* if ((fct = is_functions_associated(g_syscalls[sys].name)) != -1) */
     {
       g_print_func[fct].fct(pid, regs, return_value);
     }
@@ -116,19 +135,19 @@ int				run_trace_fork(pid_t child)
   wait(&wait_status);
   while (WIFSTOPPED(wait_status))
   {
+    sysc = 0;
     ptrace(PTRACE_GETREGS, child, 0, &regs);
     instr = ptrace(PTRACE_PEEKTEXT, child, regs.rip, 0);
-    sysc = (instr == 0x050F) ? (1) : (0);
+    if (g_archi32 == 1 && instr == 0x80CD)
+      sysc = 1;
+    else if (!g_archi32 && instr == 0x050F)
+      sysc = 1;
     if (ptrace(PTRACE_SINGLESTEP, child, 0, 0) == -1)
-    {
       return (derror("ptrace"));
-    }
     wait(&wait_status);
     ptrace(PTRACE_GETREGS, child, 0, &regs_return);
     if (sysc)
-    {
       disp_syscall(child, &regs, regs.rax, regs_return.rax);
-    }
   }
   return (0);
 }
@@ -136,19 +155,28 @@ int				run_trace_fork(pid_t child)
 int	trace_fork(int argc, char **argv, char **env)
 {
   pid_t	child;
+  char	*path;
 
-  if ((child = fork()) == -1)
+  if ((path = get_path(argv[1])))
   {
-    return (derror("fork"));
-  }
-  else if (!child)
-  {
-    run_prog(argc, argv, env);
+    if (get_archi(path) == -1)
+      return (-1);
+    if ((child = fork()) == -1)
+    {
+      return (derror("fork"));
+    }
+    else if (!child)
+    {
+      run_prog(argc, argv, env, path);
+    }
+    else
+    {
+      run_trace_fork(child);
+    }
+    free(path);
   }
   else
-  {
-    run_trace_fork(child);
-  }
+    return (derrorn("No such file"));
   return (0);
 }
 

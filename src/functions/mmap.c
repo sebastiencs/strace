@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue May  5 02:12:22 2015 chapui_s
-** Last update Tue May  5 02:58:23 2015 chapui_s
+** Last update Tue May  5 08:23:31 2015 chapui_s
 */
 
 #include "strace.h"
@@ -60,17 +60,41 @@ void		print_mmap(pid_t pid,
 			   size_t return_value)
 {
   printf("mmap(");
-  print_void_ptr(pid, regs->rdi);
+  print_void_ptr(pid, get_param(regs, 0));
   printf(", ");
-  print_size_t(pid, regs->rsi);
+  print_size_t(pid, get_param(regs, 1));
   printf(", ");
-  print_proto(regs->rdx);
+  print_proto(get_param(regs, 2));
   printf(", ");
-  print_flags(regs->rcx);
+  print_flags(get_param(regs, 3));
   printf(", ");
-  print_int(pid, regs->r8);
+  print_int(pid, get_param(regs, 4));
   printf(", ");
-  print_off_t(pid, regs->r9);
+  print_off_t(pid, get_param(regs, 5));
+  printf(") = ");
+  print_void_ptr(pid, return_value);
+  printf("\n");
+}
+
+void		print_mmap2(pid_t pid,
+			    struct user_regs_struct *regs,
+			    size_t return_value)
+{
+  printf("mmap2(");
+  if (!get_param(regs, 0))
+    printf("NULL");
+  else
+    print_void_ptr(pid, get_param(regs, 0));
+  printf(", ");
+  print_size_t(pid, get_param(regs, 1));
+  printf(", ");
+  print_proto(get_param(regs, 2));
+  printf(", ");
+  print_flags(get_param(regs, 3));
+  printf(", ");
+  print_int(pid, get_param(regs, 4));
+  printf(", ");
+  print_off_t(pid, get_param(regs, 5) << 12);
   printf(") = ");
   print_void_ptr(pid, return_value);
   printf("\n");

@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue May  5 02:58:09 2015 chapui_s
-** Last update Tue May  5 05:38:33 2015 chapui_s
+** Last update Tue May  5 08:09:48 2015 chapui_s
 */
 
 #include "strace.h"
@@ -33,9 +33,9 @@ void		print_access(pid_t pid,
 			     size_t return_value)
 {
   printf("access(");
-  print_char_ptr(pid, regs->rdi);
+  print_char_ptr(pid, get_param(regs, 0));
   printf(", ");
-  print_mode(regs->rsi);
+  print_mode(get_param(regs, 1));
   printf(") = ");
   print_int(pid, return_value);
   printf("\n");

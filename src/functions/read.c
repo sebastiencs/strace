@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue May  5 05:38:20 2015 chapui_s
-** Last update Tue May  5 06:06:43 2015 chapui_s
+** Last update Tue May  5 08:14:44 2015 chapui_s
 */
 
 #include "strace.h"
@@ -56,11 +56,11 @@ void		print_read(pid_t pid,
 			   size_t return_value)
 {
   printf("read(");
-  print_int(pid, regs->rdi);
+  print_int(pid, get_param(regs, 0));
   printf(", ");
-  print_buf(pid, (char*)regs->rsi, regs->rdx);
+  print_buf(pid, (char*)get_param(regs, 1), get_param(regs, 2));
   printf(", ");
-  print_size_t(pid, regs->rdx);
+  print_size_t(pid, get_param(regs, 2));
   printf(") = ");
   print_ssize_t(pid, return_value);
   printf("\n");

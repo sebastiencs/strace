@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue May  5 05:38:20 2015 chapui_s
-** Last update Tue May  5 06:13:42 2015 chapui_s
+** Last update Tue May  5 08:11:51 2015 chapui_s
 */
 
 #include "strace.h"
@@ -33,11 +33,11 @@ void		print_mprotect(pid_t pid,
 			       size_t return_value)
 {
   printf("mprotect(");
-  print_void_ptr(pid, regs->rdi);
+  print_void_ptr(pid, get_param(regs, 0));
   printf(", ");
-  print_size_t(pid, regs->rsi);
+  print_size_t(pid, get_param(regs, 1));
   printf(", ");
-  print_prot(regs->rdx);
+  print_prot(get_param(regs, 2));
   printf(") = ");
   print_int(pid, return_value);
   printf("\n");

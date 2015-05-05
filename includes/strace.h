@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue Apr 28 04:18:11 2015 chapui_s
-** Last update Tue May  5 06:11:16 2015 chapui_s
+** Last update Tue May  5 08:19:08 2015 chapui_s
 */
 
 #ifndef STRACE_H_
@@ -23,6 +23,7 @@
 # include <sys/types.h>
 # include <sys/stat.h>
 # include <fcntl.h>
+# include <elf.h>
 
 typedef struct	s_syscalls
 {
@@ -30,18 +31,18 @@ typedef struct	s_syscalls
   char		*name;
   char		man_found;
   unsigned	nparams;
-  char		type_return;
-  char		param1;
-  char		param2;
-  char		param3;
-  char		param4;
-  char		param5;
-  char		param6;
+  int		type_return;
+  int		param1;
+  int		param2;
+  int		param3;
+  int		param4;
+  int		param5;
+  int		param6;
 }		t_syscalls;
 
 typedef struct	s_func
 {
-  char		type;
+  int		type;
   void		(*fct)(pid_t pid, size_t value);
 }		t_func;
 
@@ -50,6 +51,8 @@ typedef struct	s_print_func
   char		*name;
   void		(*fct)(pid_t pid, struct user_regs_struct *regs, size_t ret);
 }		t_print_func;
+
+int		g_archi32;
 
 int		usage(char *);
 int		derror(char *);
@@ -60,6 +63,7 @@ int		is_syscall_defined(unsigned num);
 size_t		my_strlen(char *s);
 char		*get_path(char *file);
 char		*strdup(const char *s);
+size_t		get_param(struct user_regs_struct *regs, int nparam);
 
 void		print_int(pid_t pid, size_t value);
 void		print_size_t(pid_t pid, size_t value);
@@ -71,6 +75,9 @@ void		print_char_ptr(pid_t pid, size_t value);
 void		print_mmap(pid_t pid,
 			   struct user_regs_struct *regs,
 			   size_t ret);
+void		print_mmap2(pid_t pid,
+			    struct user_regs_struct *regs,
+			    size_t ret);
 void		print_access(pid_t pid,
 			     struct user_regs_struct *regs,
 			     size_t ret);
