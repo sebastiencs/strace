@@ -42,8 +42,8 @@ static char	*get_this_word(char *s, char sep)
   while (*end && *end != sep)
     end += 1;
   size = end - s;
-  if ((new = (char*)malloc(size + 1)) == (char*)0)
-    return ((char*)0);
+  if ((new = (char *)malloc(size + 1)) == (char *)0)
+    return ((char *)0);
   new[size] = 0;
   i = 0;
   while (i < size)
@@ -61,7 +61,7 @@ static int	get_words(char **tab, char *s, char sep)
   {
     while (*s && *s == sep)
       s += 1;
-    if ((tab[i++] = get_this_word(s, sep)) == (char*)0)
+    if ((tab[i++] = get_this_word(s, sep)) == (char *)0)
       return (-1);
     while (*s && *s != sep)
       s += 1;
@@ -77,15 +77,15 @@ char		**my_str_to_wordtab(char *s, char sep)
   int		nb_word;
 
   if (!s)
-    return ((char**)0);
+    return ((char **)0);
   nb_word = get_nb_word(s, sep);
-  if ((tab = (char**)malloc(sizeof(char*) * (nb_word + 1))) == (char**)0
+  if ((tab = (char **)malloc(sizeof(char *) * (nb_word + 1))) == (char **)0
       || get_words(tab, s, sep) == -1)
   {
     derror("malloc");
-    return ((char**)0);
+    return ((char **)0);
   }
-  tab[nb_word] = (char*)0;
+  tab[nb_word] = (char *)0;
   return (tab);
 }
 
@@ -103,5 +103,5 @@ void		free_wordtab(char ***wordtab)
   }
   free(tab[i]);
   free(tab);
-  *wordtab = (char**)0;
+  *wordtab = (char **)0;
 }

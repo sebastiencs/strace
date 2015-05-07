@@ -18,7 +18,7 @@ static int	print_word(long word)
 
   i = 0;
   nb = 0;
-  s = (char*)&word;
+  s = (char *)&word;
   while (i < 2)
   {
     if (s[i] >= 0x20 && s[i] <= 0x7E)
@@ -41,7 +41,7 @@ static int	print_buf(pid_t pid, char *ptr, size_t len)
   nb += printf("\"");
   while (i < 16 && i < len)
   {
-    text = ptrace(PTRACE_PEEKTEXT, pid, ptr, (void*)0);
+    text = ptrace(PTRACE_PEEKTEXT, pid, ptr, (void *)0);
     if (text >= 0)
     {
       nb += print_word(text);
@@ -67,7 +67,7 @@ void		print_read(pid_t pid,
   nb += printf("read(");
   nb += print_int(pid, get_param(regs, 0));
   nb += printf(", ");
-  nb += print_buf(pid, (char*)get_param(regs, 1), get_param(regs, 2));
+  nb += print_buf(pid, (char *)get_param(regs, 1), get_param(regs, 2));
   nb += printf(", ");
   nb += print_size_t(pid, get_param(regs, 2));
   nb += printf(")");

@@ -86,7 +86,7 @@ t_print_func	g_print_func[] =
   { "open", print_open },
   { "read", print_read },
   { "mprotect", print_mprotect },
-  { (char*)0, (void*)0 }
+  { (char *)0, (void *)0 }
 };
 
 int		is_functions_associated(char *name)
@@ -189,7 +189,7 @@ int	trace_fork(int argc, char **argv, char **env)
 
 int	main(int argc, char **argv, char **env)
 {
-  setbuf(stdout, (char*)0);
+  setbuf(stdout, (char *)0);
   if (!(argc - 1))
     return (usage(argv[0]));
   else if (!strcmp(argv[1], "-p"))

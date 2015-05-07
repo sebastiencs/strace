@@ -15,8 +15,8 @@ static int	print_word(long text)
   int		nb;
 
   nb = write(1, &text, 1);
-  if (((char*)&text)[1] != 0)
-    nb += write(1, &((char*)&text)[1], 1);
+  if (((char *)&text)[1] != 0)
+    nb += write(1, &((char *)&text)[1], 1);
   return (nb);
 }
 
@@ -38,8 +38,8 @@ int		print_char_ptr(pid_t pid,
     i = 0;
     while (i < 20 && my_strlen(txt) > 1)
     {
-      text = ptrace(PTRACE_PEEKTEXT, pid, s, (void*)0);
-      txt = (char*)&text;
+      text = ptrace(PTRACE_PEEKTEXT, pid, s, (void *)0);
+      txt = (char *)&text;
       if (strlen(txt))
 	nb += print_word(text);
       s += 2;

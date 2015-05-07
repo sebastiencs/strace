@@ -26,7 +26,7 @@ char		*concat_path_file(char *s1, char *s2)
   size_t	size;
 
   size = my_strlen(s1) + my_strlen(s2);
-  str = (char*)malloc(size + 2);
+  str = (char *)malloc(size + 2);
   if (str)
   {
     memset(str, 0, size + 2);
@@ -63,5 +63,5 @@ char		*get_path(char *file)
     }
     free_wordtab(&path_tab);
   }
-  return ((char*)0);
+  return ((char *)0);
 }

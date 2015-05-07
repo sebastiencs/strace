@@ -15,7 +15,7 @@ int		print_void_ptr(pid_t pid __attribute__ ((unused)),
 {
   if (value)
   {
-    return (printf("%p", (void*)value));
+    return (printf("%p", (void *)value));
   }
   else
   {
