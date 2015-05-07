@@ -12,6 +12,6 @@
 
 int		usage(char *prog)
 {
-  printf("usage:\t\t%s PROG ARGS\n\tor\t%s -p PID\n", prog, prog);
+  printf("usage:\t\t%s PROG [ARGS]\n   or\t\t%s -p PID\n", prog, prog);
   return (-1);
 }
