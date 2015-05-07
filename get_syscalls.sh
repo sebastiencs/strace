@@ -150,19 +150,20 @@ do
 		TYPE="X32$TYPE"
 	    fi
 
-	    if [ $index -eq 0 ]; then
-		PARAM1=$TYPE
-	    elif [ $index -eq 1 ]; then
-		PARAM2=$TYPE
-	    elif [ $index -eq 2 ]; then
-		PARAM3=$TYPE
-	    elif [ $index -eq 3 ]; then
-		PARAM4=$TYPE
-	    elif [ $index -eq 4 ]; then
-		PARAM5=$TYPE
-	    elif [ $index -eq 5 ]; then
-		PARAM6=$TYPE
-	    fi
+	    case $index in
+		0)
+		    PARAM1=$TYPE;;
+		1)
+		    PARAM2=$TYPE;;
+		2)
+		    PARAM3=$TYPE;;
+		3)
+		    PARAM4=$TYPE;;
+		4)
+		    PARAM5=$TYPE;;
+		5)
+		    PARAM6=$TYPE;;
+	    esac
 
 	    if [[ "$ALL_TYPES" == *" $TYPE "* ]] ; then
 		echo -n ""
