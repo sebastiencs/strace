@@ -18,18 +18,18 @@ SRC		= src/get_params.c		\
 		  src/puts.c			\
 		  src/strace.c			\
 		  src/usage.c			\
+		  src/print/print_char_ptr.c	\
 		  src/print/print_int.c		\
+		  src/print/print_off_t.c	\
 		  src/print/print_size_t.c	\
 		  src/print/print_ssize_t.c	\
-		  src/print/print_off_t.c	\
 		  src/print/print_void_ptr.c	\
-		  src/print/print_char_ptr.c	\
-		  src/functions/mmap.c		\
 		  src/functions/access.c	\
-		  src/functions/open.c		\
-		  src/functions/read.c		\
+		  src/functions/mmap.c		\
 		  src/functions/mprotect.c	\
-		  src/functions/print_generic.c
+		  src/functions/open.c		\
+		  src/functions/print_generic.c \
+		  src/functions/read.c
 
 OBJ		= $(SRC:.c=.o)
 
@@ -39,7 +39,7 @@ CC		= gcc
 
 RM		= rm -f
 
-override CFLAGS	= -W -Wall -Wextra -I $(INCLUDES)
+override CFLAGS	+= -W -Wall -Wextra -I $(INCLUDES)
 
 %.o:		%.c
 		@$(CC) -c -o $@ $<  $(CFLAGS)

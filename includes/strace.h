@@ -52,6 +52,12 @@ typedef struct	s_print_func
   void		(*fct)(pid_t pid, struct user_regs_struct *regs, size_t ret);
 }		t_print_func;
 
+typedef struct	s_arch_registers
+{
+  unsigned long	_32;
+  unsigned long	_64;
+}		t_arch_registers;
+
 int		g_archi32;
 
 int		usage(char *);
