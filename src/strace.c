@@ -5,7 +5,7 @@
 ** Login   <chapui_s@epitech.eu>
 **
 ** Started on  Tue Apr 28 04:18:52 2015 chapui_s
-** Last update Tue May  5 08:39:47 2015 chapui_s
+** Last update Sun May 10 22:59:35 2015 chapui_s
 */
 
 #include "strace.h"
@@ -140,7 +140,7 @@ int				run_trace_fork(pid_t child)
   int				sysc;
 
   wait(&wait_status);
-  while (WIFSTOPPED(wait_status))
+  while (wait_status == 1407)
   {
     sysc = 0;
     ptrace(PTRACE_GETREGS, child, 0, &regs);
@@ -156,29 +156,29 @@ int				run_trace_fork(pid_t child)
     if (sysc)
       disp_syscall(child, &regs, regs.rax, regs_return.rax);
   }
-  return (0);
+  return (wait_status);
 }
 
 int	trace_fork(int argc, char **argv, char **env)
 {
   pid_t	child;
   char	*path;
+  int	status;
 
   if ((path = get_path(argv[1])))
   {
     if (get_archi(path) == -1)
       return (-1);
     if ((child = fork()) == -1)
-    {
       return (derror("fork"));
-    }
     else if (!child)
-    {
       run_prog(argc, argv, env, path);
-    }
     else
     {
-      run_trace_fork(child);
+      if ((status = run_trace_fork(child)) != 2943)
+      	printf("+++ exited with %d +++\n", status);
+      else
+      	printf("+++ Killed by SIGSEGV (core dumped) +++\n");
     }
     free(path);
   }
