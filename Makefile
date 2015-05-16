@@ -16,6 +16,7 @@ SRC		= src/get_params.c		\
 		  src/nums_syscalls32.c		\
 		  src/paths.c			\
 		  src/puts.c			\
+		  src/signames.c		\
 		  src/strace.c			\
 		  src/usage.c			\
 		  src/print/print_char_ptr.c	\

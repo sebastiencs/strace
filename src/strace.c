@@ -158,7 +158,6 @@ int	trace_fork(int argc, char **argv, char **env)
 {
   pid_t	child;
   char	*path;
-  int	status;
 
   if ((path = get_path(argv[1])))
   {
@@ -170,10 +169,7 @@ int	trace_fork(int argc, char **argv, char **env)
       run_prog(argc, argv, env, path);
     else
     {
-      if ((status = run_trace_fork(child)) != 2943)
-      	printf("+++ exited with %d +++\n", status);
-      else
-      	printf("+++ Killed by SIGSEGV (core dumped) +++\n");
+      print_exit_status(run_trace_fork(child));
     }
     free(path);
   }
@@ -191,7 +187,7 @@ int				run_trace_pid(pid_t const pid)
   int				sysc;
 
   waitpid(pid, &wait_status, 0);
-  while (wait_status == 4991 || wait_status == 1407)
+  while (WIFSTOPPED(wait_status))
   {
     sysc = 0;
     ptrace(PTRACE_GETREGS, pid, 0, &regs);
@@ -212,19 +208,35 @@ int				run_trace_pid(pid_t const pid)
   return (wait_status);
 }
 
+extern char const *const g_signames[];
+
+int	print_exit_status(int const status)
+{
+  if (WIFEXITED(status))
+    printf("+++ exited with %d +++\n", status % 255);
+  else if (WIFSIGNALED(status))
+    {
+#ifdef WCOREDUMP
+      if (WCOREDUMP(status))
+	printf("+++ Killed by %s (core dumped) +++\n", g_signames[WTERMSIG(status)]);
+      else
+#endif
+	printf("+++ Killed by %s +++\n", g_signames[WTERMSIG(status)]);
+    }
+  else if (WIFSTOPPED(status))
+    {
+      printf("+++ Killed by %s +++\n", g_signames[WSTOPSIG(status)]);
+    }
+  return (0);
+}
+
 int	trace_pid(int argc __attribute__ ((unused)),
 		  char **argv)
 {
-  int	status;
-
   g_archi32 = 0;
   if (ptrace(PTRACE_ATTACH, atoi(argv[2]), 0, 0) == -1)
     return (derror("ptrace"));
-  if ((status = run_trace_pid(atoi(argv[2]))) != 2943)
-    printf("+++ exited with %d +++\n", status);
-  else
-    printf("+++ Killed by SIGSEGV (core dumped) +++\n");
-  return (0);
+  return (print_exit_status(run_trace_pid(atoi(argv[2]))));
 }
 
 int	main(int argc, char **argv, char **env)
