@@ -14,12 +14,6 @@
 #include "types32.h"
 #include "syscalls32.h"
 
-int	trace_pid(int argc __attribute__ ((unused)),
-		  char **argv __attribute__ ((unused)))
-{
-  return (0);
-}
-
 int		get_archi(char *filename)
 {
   int		fd;
@@ -62,7 +56,8 @@ int	run_prog(int argc __attribute__ ((unused)),
   return (0);
 }
 
-int		is_syscall_defined(unsigned num)
+
+int		is_syscall_defined(unsigned int num)
 {
   size_t	i;
 
@@ -187,12 +182,58 @@ int	trace_fork(int argc, char **argv, char **env)
   return (0);
 }
 
+int				run_trace_pid(pid_t const pid)
+{
+  struct user_regs_struct	regs;
+  struct user_regs_struct	regs_return;
+  unsigned short		instr;
+  int				wait_status;
+  int				sysc;
+
+  waitpid(pid, &wait_status, 0);
+  while (wait_status == 4991 || wait_status == 1407)
+  {
+    sysc = 0;
+    ptrace(PTRACE_GETREGS, pid, 0, &regs);
+    instr = ptrace(PTRACE_PEEKTEXT, pid, regs.rip, 0);
+    if (g_archi32 == 1 && instr == 0x80CD)
+      sysc = 1;
+    else if (!g_archi32 && instr == 0x050F)
+      sysc = 1;
+    if (ptrace(PTRACE_SINGLESTEP, pid, 0, 0) == -1)
+      return (derror("ptrace"));
+    waitpid(pid, &wait_status, 0);
+    ptrace(PTRACE_GETREGS, pid, 0, &regs_return);
+    if (sysc)
+      disp_syscall(pid, &regs, regs.rax, regs_return.rax);
+  }
+  if (ptrace(PTRACE_DETACH, pid, 0, 0) == -1)
+    return (derror("ptrace"));
+  return (wait_status);
+}
+
+int	trace_pid(int argc __attribute__ ((unused)),
+		  char **argv)
+{
+  int	status;
+
+  g_archi32 = 0;
+  if (ptrace(PTRACE_ATTACH, atoi(argv[2]), 0, 0) == -1)
+    return (derror("ptrace"));
+  if ((status = run_trace_pid(atoi(argv[2]))) != 2943)
+    printf("+++ exited with %d +++\n", status);
+  else
+    printf("+++ Killed by SIGSEGV (core dumped) +++\n");
+  return (0);
+}
+
 int	main(int argc, char **argv, char **env)
 {
   setbuf(stdout, (char *)0);
   if (!(argc - 1))
     return (usage(argv[0]));
-  else if (!strcmp(argv[1], "-p"))
+  else if (!strcmp(argv[1], "-p")
+	   && argv[2])
     return (trace_pid(argc, argv));
   else
     return (trace_fork(argc, argv, env));
