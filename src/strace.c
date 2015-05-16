@@ -90,17 +90,8 @@ int		is_functions_associated(char *name)
 
   i = 0;
   while (g_print_func[i].name && strcmp(name, g_print_func[i].name))
-  {
     i += 1;
-  }
-  if (g_print_func[i].name)
-  {
-    return (i);
-  }
-  else
-  {
-    return (-1);
-  }
+  return (g_print_func[i].name ? (signed)i : -1);
 }
 
 void		disp_syscall(pid_t pid,
@@ -116,17 +107,15 @@ void		disp_syscall(pid_t pid,
   if ((sys = is_syscall_defined(num)) >= 0)
   {
     if ((fct = is_functions_associated(ptr[sys].name)) != -1)
-    {
       g_print_func[fct].fct(pid, regs, return_value);
-    }
     else
-    {
       print_generic(pid, regs, return_value, num);
-    }
   }
 }
 
-int				run_trace_fork(pid_t child)
+extern char const *const g_signames[];
+
+int				run_trace(pid_t const pid)
 {
   struct user_regs_struct	regs;
   struct user_regs_struct	regs_return;
@@ -134,22 +123,27 @@ int				run_trace_fork(pid_t child)
   int				wait_status;
   int				sysc;
 
-  wait(&wait_status);
-  while (wait_status == 1407)
+  waitpid(pid, &wait_status, 0);
+  while (WIFSTOPPED(wait_status)
+	 && (WSTOPSIG(wait_status) == SIGTRAP
+	     || WSTOPSIG(wait_status) == SIGSTOP))
   {
     sysc = 0;
-    ptrace(PTRACE_GETREGS, child, 0, &regs);
-    instr = ptrace(PTRACE_PEEKTEXT, child, regs.rip, 0);
+    ptrace(PTRACE_GETREGS, pid, 0, &regs);
+    instr = ptrace(PTRACE_PEEKTEXT, pid, regs.rip, 0);
     if (g_archi32 == 1 && instr == 0x80CD)
       sysc = 1;
     else if (!g_archi32 && instr == 0x050F)
       sysc = 1;
-    if (ptrace(PTRACE_SINGLESTEP, child, 0, 0) == -1)
+    if (ptrace(PTRACE_SINGLESTEP, pid, 0, 0) == -1)
       return (derror("ptrace"));
-    wait(&wait_status);
-    ptrace(PTRACE_GETREGS, child, 0, &regs_return);
+    ptrace(PTRACE_GETREGS, pid, 0, &regs_return);
     if (sysc)
-      disp_syscall(child, &regs, regs.rax, regs_return.rax);
+      disp_syscall(pid, &regs, regs.rax, regs_return.rax);
+    waitpid(pid, &wait_status, 0);
+    if (WIFSTOPPED(wait_status)
+	&& WSTOPSIG(wait_status) != SIGTRAP)
+      printf("--- %s ---\n", g_signames[WSTOPSIG(wait_status)]);
   }
   return (wait_status);
 }
@@ -168,9 +162,7 @@ int	trace_fork(int argc, char **argv, char **env)
     else if (!child)
       run_prog(argc, argv, env, path);
     else
-    {
-      print_exit_status(run_trace_fork(child));
-    }
+      print_exit_status(run_trace(child));
     free(path);
   }
   else
@@ -178,65 +170,39 @@ int	trace_fork(int argc, char **argv, char **env)
   return (0);
 }
 
-int				run_trace_pid(pid_t const pid)
-{
-  struct user_regs_struct	regs;
-  struct user_regs_struct	regs_return;
-  unsigned short		instr;
-  int				wait_status;
-  int				sysc;
-
-  waitpid(pid, &wait_status, 0);
-  while (WIFSTOPPED(wait_status))
-  {
-    sysc = 0;
-    ptrace(PTRACE_GETREGS, pid, 0, &regs);
-    instr = ptrace(PTRACE_PEEKTEXT, pid, regs.rip, 0);
-    if (g_archi32 == 1 && instr == 0x80CD)
-      sysc = 1;
-    else if (!g_archi32 && instr == 0x050F)
-      sysc = 1;
-    if (ptrace(PTRACE_SINGLESTEP, pid, 0, 0) == -1)
-      return (derror("ptrace"));
-    waitpid(pid, &wait_status, 0);
-    ptrace(PTRACE_GETREGS, pid, 0, &regs_return);
-    if (sysc)
-      disp_syscall(pid, &regs, regs.rax, regs_return.rax);
-  }
-  if (ptrace(PTRACE_DETACH, pid, 0, 0) == -1)
-    return (derror("ptrace"));
-  return (wait_status);
-}
-
-extern char const *const g_signames[];
-
 int	print_exit_status(int const status)
 {
+  if (status == -1)
+    return (-1);
   if (WIFEXITED(status))
-    printf("+++ exited with %d +++\n", status % 255);
+    printf("+++ exited with %d +++\n", WEXITSTATUS(status));
   else if (WIFSIGNALED(status))
     {
 #ifdef WCOREDUMP
       if (WCOREDUMP(status))
-	printf("+++ Killed by %s (core dumped) +++\n", g_signames[WTERMSIG(status)]);
+	printf("+++ Killed by %s (core dumped) +++\n",
+	       g_signames[WTERMSIG(status)]);
       else
 #endif
 	printf("+++ Killed by %s +++\n", g_signames[WTERMSIG(status)]);
     }
   else if (WIFSTOPPED(status))
-    {
-      printf("+++ Killed by %s +++\n", g_signames[WSTOPSIG(status)]);
-    }
+    printf("+++ Killed by %s +++\n", g_signames[WSTOPSIG(status)]);
   return (0);
 }
 
-int	trace_pid(int argc __attribute__ ((unused)),
-		  char **argv)
+int	trace_pid(int argc __attribute__ ((unused)), char **argv)
 {
+  int	status;
+
   g_archi32 = 0;
   if (ptrace(PTRACE_ATTACH, atoi(argv[2]), 0, 0) == -1)
     return (derror("ptrace"));
-  return (print_exit_status(run_trace_pid(atoi(argv[2]))));
+  ptrace(PTRACE_CONT, atoi(argv[2]), 0, 0);
+  if ((status = run_trace(atoi(argv[2]))) == -1)
+    return (-1);
+  ptrace(PTRACE_DETACH, argv[2], 0, 0);
+  return (print_exit_status(status));
 }
 
 int	main(int argc, char **argv, char **env)
