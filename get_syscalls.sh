@@ -5,7 +5,7 @@
 # cat /usr/include/asm/unistd_64.h | cut -d ' ' -f 2,3 | grep __NR_ | sed "s/ /\", /g" | sed "s/__NR_/{ \"/g" | sed ':a;N;$!ba;s/\n/ },\n/g'
 
 TMP_DIR="tmp"
-FILE_SYSCALLS="src/nums_syscalls.c"
+FILE_SYSCALLS="includes/syscalls.h"
 FILE_TYPES="includes/types.h"
 TEMPLATE_SYSCALLS="templates/syscalls_base.h"
 TEMPLATE_TYPES="templates/types_base.h"
@@ -19,7 +19,7 @@ if [ $# -lt 1 ]; then
 fi
 
 if [ $(basename "$1") == "unistd_32.h" ]; then
-    FILE_SYSCALLS="src/nums_syscalls32.c"
+    FILE_SYSCALLS="includes/syscalls32.h"
     FILE_TYPES="includes/types32.h"
     TEMPLATE_SYSCALLS="templates/syscalls32_base.h"
     TEMPLATE_TYPES="templates/types32_base.h"
@@ -27,6 +27,8 @@ if [ $(basename "$1") == "unistd_32.h" ]; then
     NAME_SIZE_TAB="g_size_tab32"
     ARCH_32BITS="1"
 fi
+
+cd `dirname $0`
 
 mkdir -p $TMP_DIR
 cat "$1" | cut -d ' ' -f 2 | grep __NR_ | sed "s/ /\", /g" | sed "s/__NR_//g" > $TMP_DIR/tmp_syscalls
@@ -195,5 +197,13 @@ if [ "$ARCH_32BITS" -eq "1" ]; then
 else
     echo -e "\n#endif /* !TYPES_H_ */" >> $FILE_TYPES
 fi
-echo -e "};\n\nsize_t\t$NAME_SIZE_TAB = sizeof($NAME_TAB) / sizeof($NAME_TAB[0]);\n" >> $FILE_SYSCALLS
+
+echo -e "};\n\nstatic size_t\t$NAME_SIZE_TAB  __attribute__ ((unused)) = sizeof($NAME_TAB) / sizeof($NAME_TAB[0]);\n" >> $FILE_SYSCALLS
+if [ "$ARCH_32BITS" -eq "1" ]; then
+    echo -e "\n#endif /* !SYSCALLS32_H_ */" >> $FILE_SYSCALLS
+else
+    echo -e "\n#endif /* !SYSCALLS_H_ */" >> $FILE_SYSCALLS
+fi
 #echo -e "};\n\n#endif /* !SYSCALL_H_ */" >> $FILE_SYSCALLS
+
+rm -fr $TMP_DIR

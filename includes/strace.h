@@ -64,7 +64,6 @@ typedef struct	s_arch_registers
 
 int				g_archi32;
 extern pid_t			g_pid;
-extern char const *const	g_signames[];
 
 int		usage(char *);
 int		derror(char *);

@@ -8,8 +8,11 @@
 ** Last update Tue May  5 08:47:37 2015 chapui_s
 */
 
-#include "types32.h"
-#include "strace.h"
+#ifndef SYSCALLS32_H_
+# define SYSCALLS32_H_
 
-t_syscalls	g_syscalls32[] =
+# include "types32.h"
+# include "strace.h"
+
+static t_syscalls	g_syscalls32[] =
 {

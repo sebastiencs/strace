@@ -9,6 +9,8 @@
 */
 
 #include "strace.h"
+#include "types.h"
+#include "types32.h"
 #include "syscalls.h"
 #include "syscalls32.h"
 

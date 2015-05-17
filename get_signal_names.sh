@@ -2,12 +2,13 @@
 
 cd `dirname $0`
 
-cp templates/signames.c src/
-echo '  "'Undefined'",' >> src/signames.c
+cp templates/signames.h includes/
+echo '  "'Undefined'",' >> includes/signames.h
 
 for signal in `kill -l | tr ' ' '
 '`; do
-    echo '  "'SIG$signal'",' >> src/signames.c
+    echo '  "'SIG$signal'",' >> includes/signames.h
 done
 
-echo '};' >> src/signames.c
+echo '};' >> includes/signames.h
+echo -e "\n#endif /* !SIGNAMES_H_ */" >> includes/signames.h

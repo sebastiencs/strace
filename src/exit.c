@@ -9,6 +9,7 @@
 */
 
 #include "strace.h"
+#include "signames.h"
 
 void	trace_pid_handler(int const sig UNUSED)
 {

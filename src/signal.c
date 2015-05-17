@@ -9,6 +9,7 @@
 */
 
 #include "strace.h"
+#include "signames.h"
 
 INLINE int	signal_continue(int const status)
 {

@@ -14,12 +14,9 @@ SRC		= src/arch.c			\
 		  src/exit.c			\
 		  src/get_params.c		\
 		  src/my_str_to_wordtab.c	\
-		  src/nums_syscalls.c		\
-		  src/nums_syscalls32.c		\
 		  src/paths.c			\
 		  src/puts.c			\
 		  src/signal.c			\
-		  src/signames.c		\
 		  src/strace.c			\
 		  src/syscall.c			\
 		  src/usage.c			\
@@ -53,6 +50,12 @@ override CFLAGS	+= -W -Wall -Wextra -I $(INCLUDES)
 all:		$(NAME)
 
 $(NAME):	$(OBJ)
+		@printf "[\033[0;36mGenerating\033[0m] % 27s\n" "64bits_syscalls" | tr ' ' '.'
+		@./get_syscalls.sh /usr/include/asm/unistd_64.h
+		@printf "[\033[0;36mGenerating\033[0m] % 27s\n" "32bits_syscalls" | tr ' ' '.'
+		@./get_syscalls.sh /usr/include/asm/unistd_32.h
+		@printf "[\033[0;36mGenerating\033[0m] % 27s\n" "signal_names" | tr ' ' '.'
+		@./get_signal_names.sh
 		@$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
 		@printf "[\033[0;36mbuilt\033[0m] % 32s\n" $(NAME) | tr ' ' '.'
 
