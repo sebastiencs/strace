@@ -131,9 +131,8 @@ int				run_trace(pid_t const pid)
     sysc = 0;
     ptrace(PTRACE_GETREGS, pid, 0, &regs);
     instr = ptrace(PTRACE_PEEKTEXT, pid, regs.rip, 0);
-    if (g_archi32 == 1 && instr == 0x80CD)
-      sysc = 1;
-    else if (!g_archi32 && instr == 0x050F)
+    if ((g_archi32 == 1 && instr == 0x80CD)
+	|| (!g_archi32 && instr == 0x050F))
       sysc = 1;
     if (ptrace(PTRACE_SINGLESTEP, pid, 0, 0) == -1)
       return (derror("ptrace"));
@@ -170,38 +169,26 @@ int	trace_fork(int argc, char **argv, char **env)
   return (0);
 }
 
-int	print_exit_status(int const status)
-{
-  if (status == -1)
-    return (-1);
-  if (WIFEXITED(status))
-    printf("+++ exited with %d +++\n", WEXITSTATUS(status));
-  else if (WIFSIGNALED(status))
-    {
-#ifdef WCOREDUMP
-      if (WCOREDUMP(status))
-	printf("+++ Killed by %s (core dumped) +++\n",
-	       g_signames[WTERMSIG(status)]);
-      else
-#endif
-	printf("+++ Killed by %s +++\n", g_signames[WTERMSIG(status)]);
-    }
-  else if (WIFSTOPPED(status))
-    printf("+++ Killed by %s +++\n", g_signames[WSTOPSIG(status)]);
-  return (0);
-}
+/*
+** global used for signal handling (exiting cleanly on ^C)
+*/
+pid_t g_pid = 0;
 
-int	trace_pid(int argc __attribute__ ((unused)), char **argv)
+int	trace_pid(char **argv)
 {
   int	status;
 
+  signal(SIGINT, trace_pid_handler);
+  signal(SIGTERM, trace_pid_handler);
+  signal(SIGQUIT, trace_pid_handler);
+  g_pid = atoi(argv[2]);
   g_archi32 = 0;
-  if (ptrace(PTRACE_ATTACH, atoi(argv[2]), 0, 0) == -1)
+  if (ptrace(PTRACE_ATTACH, g_pid, 0, 0) == -1)
     return (derror("ptrace"));
-  ptrace(PTRACE_CONT, atoi(argv[2]), 0, 0);
-  if ((status = run_trace(atoi(argv[2]))) == -1)
+  ptrace(PTRACE_CONT, g_pid, 0, 0);
+  if ((status = run_trace(g_pid)) == -1)
     return (-1);
-  ptrace(PTRACE_DETACH, argv[2], 0, 0);
+  ptrace(PTRACE_DETACH, g_pid, 0, 0);
   return (print_exit_status(status));
 }
 
@@ -212,7 +199,7 @@ int	main(int argc, char **argv, char **env)
     return (usage(argv[0]));
   else if (!strcmp(argv[1], "-p")
 	   && argv[2])
-    return (trace_pid(argc, argv));
+    return (trace_pid(argv));
   else
     return (trace_fork(argc, argv, env));
 }

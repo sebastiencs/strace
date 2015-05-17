@@ -10,7 +10,8 @@
 
 NAME		= strace
 
-SRC		= src/get_params.c		\
+SRC		= src/exit.c			\
+		  src/get_params.c		\
 		  src/my_str_to_wordtab.c	\
 		  src/nums_syscalls.c		\
 		  src/nums_syscalls32.c		\

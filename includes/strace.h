@@ -68,7 +68,6 @@ void		free_wordtab(char ***wordtab);
 int		is_syscall_defined(unsigned num);
 size_t		my_strlen(char *s);
 char		*get_path(char *file);
-char		*strdup(const char *s);
 size_t		get_param(struct user_regs_struct *regs, int nparam);
 void		print_space(int nb);
 
@@ -101,5 +100,8 @@ void		print_generic(pid_t pid,
 			      struct user_regs_struct *regs,
 			      size_t return_value,
 			      int num);
+
+void		trace_pid_handler(int const sig __attribute__ ((unused))) __attribute__ ((noreturn));
+int		print_exit_status(int const status);
 
 #endif /* !STRACE_H_ */
