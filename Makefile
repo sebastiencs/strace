@@ -10,15 +10,18 @@
 
 NAME		= strace
 
-SRC		= src/exit.c			\
+SRC		= src/arch.c			\
+		  src/exit.c			\
 		  src/get_params.c		\
 		  src/my_str_to_wordtab.c	\
 		  src/nums_syscalls.c		\
 		  src/nums_syscalls32.c		\
 		  src/paths.c			\
 		  src/puts.c			\
+		  src/signal.c			\
 		  src/signames.c		\
 		  src/strace.c			\
+		  src/syscall.c			\
 		  src/usage.c			\
 		  src/print/print_char_ptr.c	\
 		  src/print/print_int.c		\

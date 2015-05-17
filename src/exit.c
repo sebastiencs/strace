@@ -1,5 +1,5 @@
 /*
-** exit.c for  in /home/broggi_t/projet/strace/src
+** exit.c for strace in /home/broggi_t/projet/strace/src
 ** 
 ** Made by broggi_t
 ** Login   <broggi_t@epitech.eu>
@@ -10,10 +10,7 @@
 
 #include "strace.h"
 
-extern pid_t g_pid;
-extern char const *const g_signames[];
-
-void	trace_pid_handler(int const sig __attribute__ ((unused)))
+void	trace_pid_handler(int const sig UNUSED)
 {
   ptrace(PTRACE_DETACH, g_pid, 0, 0);
   ptrace(PTRACE_CONT, g_pid, 0, 0);

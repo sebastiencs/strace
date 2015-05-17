@@ -10,110 +10,20 @@
 
 #include "strace.h"
 #include "types.h"
-#include "syscalls.h"
 #include "types32.h"
-#include "syscalls32.h"
 
-int		get_archi(char *filename)
-{
-  int		fd;
-  Elf32_Ehdr	header;
-
-  g_archi32 = 0;
-  if ((fd = open(filename, O_RDONLY)) == -1)
-    return (-1);
-  if (read(fd, &header, sizeof(Elf32_Ehdr)) != sizeof(Elf32_Ehdr))
-  {
-    close(fd);
-    return (-1);
-  }
-  if (header.e_machine == EM_386)
-    g_archi32 = 1;
-  else if (header.e_machine != EM_X86_64)
-  {
-    close(fd);
-    return (derrorn("Unsupported format"));
-  }
-  close(fd);
-  return (0);
-}
-
-int	run_prog(int argc __attribute__ ((unused)),
-		 char **argv,
+int	run_prog(char **argv,
 		 char **env,
 		 char *path)
 {
   if (g_archi32)
     printf("[ Process PID=%d runs in 32 bit mode. ]\n", getpid());
   if (ptrace(PTRACE_TRACEME, 0, 0, 0, 0) == -1)
-  {
     return (derror("ptrace"));
-  }
   if (execve(path, &argv[1], env) == -1)
-  {
     return (derror("execve"));
-  }
   return (0);
 }
-
-
-int		is_syscall_defined(unsigned int num)
-{
-  size_t	i;
-
-  i = 0;
-  while (i < g_size_tab)
-  {
-    if (g_archi32 && g_syscalls32[i].num == num)
-      return (i);
-    else if (!g_archi32 && g_syscalls[i].num == num)
-      return (i);
-    i += 1;
-  }
-  return (-1);
-}
-
-t_print_func	g_print_func[] =
-{
-  { "mmap", print_mmap },
-  { "mmap2", print_mmap2 },
-  { "access", print_access },
-  { "open", print_open },
-  { "read", print_read },
-  { "mprotect", print_mprotect },
-  { (char *)0, (void *)0 }
-};
-
-int		is_functions_associated(char *name)
-{
-  size_t	i;
-
-  i = 0;
-  while (g_print_func[i].name && strcmp(name, g_print_func[i].name))
-    i += 1;
-  return (g_print_func[i].name ? (signed)i : -1);
-}
-
-void		disp_syscall(pid_t pid,
-			     struct user_regs_struct *regs,
-			     unsigned num,
-			     size_t return_value)
-{
-  int		sys;
-  int		fct;
-  t_syscalls	*ptr;
-
-  ptr = (g_archi32) ? (g_syscalls32) : (g_syscalls);
-  if ((sys = is_syscall_defined(num)) >= 0)
-  {
-    if ((fct = is_functions_associated(ptr[sys].name)) != -1)
-      g_print_func[fct].fct(pid, regs, return_value);
-    else
-      print_generic(pid, regs, return_value, num);
-  }
-}
-
-extern char const *const g_signames[];
 
 int				run_trace(pid_t const pid)
 {
@@ -124,9 +34,7 @@ int				run_trace(pid_t const pid)
   int				sysc;
 
   waitpid(pid, &wait_status, 0);
-  while (WIFSTOPPED(wait_status)
-	 && (WSTOPSIG(wait_status) == SIGTRAP
-	     || WSTOPSIG(wait_status) == SIGSTOP))
+  while (signal_continue(wait_status))
   {
     sysc = 0;
     ptrace(PTRACE_GETREGS, pid, 0, &regs);
@@ -140,14 +48,12 @@ int				run_trace(pid_t const pid)
     if (sysc)
       disp_syscall(pid, &regs, regs.rax, regs_return.rax);
     waitpid(pid, &wait_status, 0);
-    if (WIFSTOPPED(wait_status)
-	&& WSTOPSIG(wait_status) != SIGTRAP)
-      printf("--- %s ---\n", g_signames[WSTOPSIG(wait_status)]);
+    check_signal(wait_status);
   }
   return (wait_status);
 }
 
-int	trace_fork(int argc, char **argv, char **env)
+int	trace_fork(char **argv, char **env)
 {
   pid_t	child;
   char	*path;
@@ -159,7 +65,7 @@ int	trace_fork(int argc, char **argv, char **env)
     if ((child = fork()) == -1)
       return (derror("fork"));
     else if (!child)
-      run_prog(argc, argv, env, path);
+      run_prog(argv, env, path);
     else
       print_exit_status(run_trace(child));
     free(path);
@@ -201,5 +107,5 @@ int	main(int argc, char **argv, char **env)
 	   && argv[2])
     return (trace_pid(argv));
   else
-    return (trace_fork(argc, argv, env));
+    return (trace_fork(argv, env));
 }

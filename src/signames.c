@@ -1,5 +1,5 @@
 /*
-** signames.c for  in /home/broggi_t/projet/strace/templates
+** signames.c for strace in /home/broggi_t/projet/strace/templates
 ** 
 ** Made by broggi_t
 ** Login   <broggi_t@epitech.eu>

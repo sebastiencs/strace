@@ -25,6 +25,10 @@
 # include <fcntl.h>
 # include <elf.h>
 
+# define INLINE		inline __attribute__ ((always_inline))
+# define UNUSED		__attribute__ ((unused))
+# define NORETURN	__attribute__ ((noreturn))
+
 typedef struct	s_syscalls
 {
   unsigned	num;
@@ -58,14 +62,16 @@ typedef struct	s_arch_registers
   unsigned long	_64;
 }		t_arch_registers;
 
-int		g_archi32;
+int				g_archi32;
+extern pid_t			g_pid;
+extern char const *const	g_signames[];
 
 int		usage(char *);
 int		derror(char *);
 int		derrorn(char *);
 char		**my_str_to_wordtab(char *s, char sep);
 void		free_wordtab(char ***wordtab);
-int		is_syscall_defined(unsigned num);
+int		is_syscall_defined(unsigned const num);
 size_t		my_strlen(char *s);
 char		*get_path(char *file);
 size_t		get_param(struct user_regs_struct *regs, int nparam);
@@ -101,7 +107,16 @@ void		print_generic(pid_t pid,
 			      size_t return_value,
 			      int num);
 
-void		trace_pid_handler(int const sig __attribute__ ((unused))) __attribute__ ((noreturn));
+void		trace_pid_handler(int const sig UNUSED) NORETURN;
 int		print_exit_status(int const status);
+
+int		signal_continue(int const status);
+void		check_signal(int const status);
+
+int		get_archi(char const *const filename);
+void		disp_syscall(pid_t pid,
+			     struct user_regs_struct *regs,
+			     unsigned num,
+			     size_t return_value);
 
 #endif /* !STRACE_H_ */

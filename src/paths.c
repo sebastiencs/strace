@@ -10,12 +10,12 @@
 
 #include "strace.h"
 
-size_t	my_strlen(char *s)
+INLINE size_t	my_strlen(char *s)
 {
   return ((s) ? (strlen(s)) : (0));
 }
 
-char	*my_strcat(char *dest, char *src)
+INLINE char	*my_strcat(char *dest, char *src)
 {
   return ((dest && src) ? (strcat(dest, src)) : (dest));
 }
