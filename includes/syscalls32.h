@@ -949,4 +949,4 @@ static t_syscalls	g_syscalls32[] =
 static size_t	g_size_tab32  __attribute__ ((unused)) = sizeof(g_syscalls32) / sizeof(g_syscalls32[0]);
 
 
-#endif /* !SYSCALLS_H_ */
+#endif /* !SYSCALLS32_H_ */

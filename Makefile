@@ -47,15 +47,17 @@ override CFLAGS	+= -W -Wall -Wextra -I $(INCLUDES)
 		@$(CC) -c -o $@ $<  $(CFLAGS)
 		@printf "[\033[0;32mcompiled\033[0m] % 29s\n" $< |  tr ' ' '.'
 
-all:		$(NAME)
-
-$(NAME):	$(OBJ)
+generate:
 		@printf "[\033[0;36mGenerating\033[0m] % 27s\n" "64bits_syscalls" | tr ' ' '.'
 		@./get_syscalls.sh /usr/include/asm/unistd_64.h
 		@printf "[\033[0;36mGenerating\033[0m] % 27s\n" "32bits_syscalls" | tr ' ' '.'
 		@./get_syscalls.sh /usr/include/asm/unistd_32.h
 		@printf "[\033[0;36mGenerating\033[0m] % 27s\n" "signal_names" | tr ' ' '.'
 		@./get_signal_names.sh
+
+all:		generate $(NAME)
+
+$(NAME):	$(OBJ)
 		@$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
 		@printf "[\033[0;36mbuilt\033[0m] % 32s\n" $(NAME) | tr ' ' '.'
 
