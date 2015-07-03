@@ -44,10 +44,10 @@ int				run_trace(pid_t const pid)
       sysc = 1;
     if (ptrace(PTRACE_SINGLESTEP, pid, 0, 0) == -1)
       return (derror("ptrace"));
+    waitpid(pid, &wait_status, 0);
     ptrace(PTRACE_GETREGS, pid, 0, &regs_return);
     if (sysc)
       disp_syscall(pid, &regs, regs.rax, regs_return.rax);
-    waitpid(pid, &wait_status, 0);
     check_signal(wait_status);
   }
   return (wait_status);
